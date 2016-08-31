@@ -27,8 +27,187 @@
     <h1>Time and Money: How major occupations stack up for VR consumers</h1>
     <hr>
       <p class="lead">At most jobs, employees who work fewer hours make less money. An exception is employees working in ‘Arts, Design, Entertainment, Sports and Media’ occupations, where employees make more money and work fewer hours on average.</p>
-    <img src="images/index.png">
-  <p><em>replace the above image with a statement</em></p>
+    
+ <div id="chart"></div>
+
+<script src="http://d3js.org/d3.v2.min.js"></script>
+
+<script>
+
+function renderChart() {
+
+var data = d3.csv.parse(d3.select('#csv').text());
+
+var valueLabelWidth = 40; // space reserved for value labels (right)
+
+var barHeight = 20; // height of one bar
+
+var barLabelWidth = 100; // space reserved for bar labels
+
+var barLabelPadding = 5; // padding between bar and bar labels (left)
+
+var gridLabelHeight = 18; // space reserved for gridline labels
+
+var gridChartOffset = 3; // space between start of grid and first bar
+
+var maxBarWidth = 420; // width of the bar with the max value
+
+// data aggregation
+
+var aggregatedData = d3.nest()
+
+.key(function(d) { return d['Type of Job']; })
+
+.rollup(function(d) {
+
+return {
+
+'value': d3.sum(d, function(e) { return parseFloat(e[' Average Weekly Income']); })
+
+};
+
+})
+
+.entries(data);
+
+// accessor functions
+
+var barLabel = function(d) { return d.key; };
+
+var barValue = function(d) { return d.values.value; };
+
+// scales
+
+var yScale = d3.scale.ordinal().domain(d3.range(0, aggregatedData.length)).rangeBands([0, aggregatedData.length * barHeight]);
+
+var y = function(d, i) { return yScale(i); };
+
+var yText = function(d, i) { return y(d, i) + yScale.rangeBand() / 2; };
+
+var x = d3.scale.linear().domain([0, d3.max(aggregatedData, barValue)]).range([0, maxBarWidth]);
+
+// svg container element
+
+var chart = d3.select('#chart').append("svg")
+
+.attr('width', maxBarWidth + barLabelWidth + valueLabelWidth)
+
+.attr('height', gridLabelHeight + gridChartOffset + aggregatedData.length * barHeight);
+
+// grid line labels
+
+var gridContainer = chart.append('g')
+
+.attr('transform', 'translate(' + barLabelWidth + ',' + gridLabelHeight + ')');
+
+gridContainer.selectAll("text").data(x.ticks(10)).enter().append("text")
+
+.attr("x", x)
+
+.attr("dy", -3)
+
+.attr("text-anchor", "middle")
+
+.text(String);
+
+// vertical grid lines
+
+gridContainer.selectAll("line").data(x.ticks(10)).enter().append("line")
+
+.attr("x1", x)
+
+.attr("x2", x)
+
+.attr("y1", 0)
+
+.attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+
+.style("stroke", "#ccc");
+
+// bar labels
+
+var labelsContainer = chart.append('g')
+
+.attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + (gridLabelHeight + gridChartOffset) + ')');
+
+labelsContainer.selectAll('text').data(aggregatedData).enter().append('text')
+
+.attr('y', yText)
+
+.attr('stroke', 'none')
+
+.attr('fill', 'black')
+
+.attr("dy", ".35em") // vertical-align: middle
+
+.attr('text-anchor', 'end')
+
+.text(barLabel);
+
+// bars
+
+var barsContainer = chart.append('g')
+
+.attr('transform', 'translate(' + barLabelWidth + ',' + (gridLabelHeight + gridChartOffset) + ')');
+
+barsContainer.selectAll("rect").data(aggregatedData).enter().append("rect")
+
+.attr('y', y)
+
+.attr('height', yScale.rangeBand())
+
+.attr('width', function(d) { return x(barValue(d)); })
+
+.attr('stroke', 'white')
+
+.attr('fill', 'steelblue');
+
+// bar value labels
+
+barsContainer.selectAll("text").data(aggregatedData).enter().append("text")
+
+.attr("x", function(d) { return x(barValue(d)); })
+
+.attr("y", yText)
+
+.attr("dx", 3) // padding-left
+
+.attr("dy", ".35em") // vertical-align: middle
+
+.attr("text-anchor", "start") // text-align: right
+
+.attr("fill", "black")
+
+.attr("stroke", "none")
+
+.text(function(d) { return d3.round(barValue(d), 2); });
+
+// start line
+
+barsContainer.append("line")
+
+.attr("y1", -gridChartOffset)
+
+.attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+
+.style("stroke", "#000");
+
+}
+
+</script>
+
+<script id="csv" type="text/csv">Type of Job, Average Weekly Income, Average Weekly Hours
+
+Food Prep/Services, 27
+
+Architecture and Engineering,37
+
+</script>
+
+<script>renderChart();</script>
+
+
+
 
 <p>Few VR consumers become employed in these types of occupations, which include low-demand jobs that often require specialized skills, such as as fashion designers, actors, sports coaches, and authors. </p>
 
@@ -43,12 +222,1930 @@
 
 <h3>If the low-demand jobs are the higher-wage jobs, what are the implications for VR consumers?</h3>
 
-<div class='tableauPlaceholder' id='viz1470932790266' style='position: relative'><noscript><a href='#'><img alt='Average Weekly Wages(Source: RSA911, Year 2008-2014) ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;AverageWeeklyWages&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='site_root' value='' /><param name='name' value='OccupationalStatistics2008-2014&#47;AverageWeeklyWages' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;AverageWeeklyWages&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1470932790266');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.minWidth='424px';vizElement.style.maxWidth='654px';vizElement.style.minHeight='629px';vizElement.style.maxHeight='929px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
+<!--<div class='tableauPlaceholder' id='viz1470932790266' style='position: relative'><noscript><a href='#'><img alt='Average Weekly Wages(Source: RSA911, Year 2008-2014) ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;AverageWeeklyWages&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='site_root' value='' /><param name='name' value='OccupationalStatistics2008-2014&#47;AverageWeeklyWages' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;AverageWeeklyWages&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1470932790266');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.minWidth='424px';vizElement.style.maxWidth='654px';vizElement.style.minHeight='629px';vizElement.style.maxHeight='929px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>-->
+
+
+
+<!-- jsHeader -->
+<script type="text/javascript">
+ 
+// jsData 
+function gvisDataGeoChartID50ed115e5239 () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+ "US-AK",
+521.96 
+],
+[
+ "US-AL",
+452.84 
+],
+[
+ "US-AR",
+420.76 
+],
+[
+ "US-AS",
+306.69 
+],
+[
+ "US-AZ",
+461.46 
+],
+[
+ "US-CA",
+525.34 
+],
+[
+ "US-CO",
+483.71 
+],
+[
+ "US-CT",
+752.51 
+],
+[
+ "US-DC",
+453.04 
+],
+[
+ "US-DE",
+394.31 
+],
+[
+ "US-FL",
+490.33 
+],
+[
+ "US-GA",
+420.88 
+],
+[
+ "US-GU",
+null 
+],
+[
+ "US-HI",
+487.3 
+],
+[
+ "US-IA",
+494.73 
+],
+[
+ "US-ID",
+415.34 
+],
+[
+ "US-IL",
+465.72 
+],
+[
+ "US-IN",
+506.78 
+],
+[
+ "US-KS",
+388.38 
+],
+[
+ "US-KY",
+502.21 
+],
+[
+ "US-LA",
+612.19 
+],
+[
+ "US-MA",
+478.29 
+],
+[
+ "US-MD",
+433.43 
+],
+[
+ "US-ME",
+418.31 
+],
+[
+ "US-MI",
+563.42 
+],
+[
+ "US-MN",
+435.47 
+],
+[
+ "US-MO",
+405.53 
+],
+[
+ "US-MP",
+428.04 
+],
+[
+ "US-MS",
+523.92 
+],
+[
+ "US-MT",
+374.38 
+],
+[
+ "US-NC",
+391.61 
+],
+[
+ "US-ND",
+474.34 
+],
+[
+ "US-NE",
+406.36 
+],
+[
+ "US-NH",
+433.7 
+],
+[
+ "US-NJ",
+500.3 
+],
+[
+ "US-NM",
+502.97 
+],
+[
+ "US-NV",
+475.81 
+],
+[
+ "US-NY",
+457.47 
+],
+[
+ "US-OH",
+633.33 
+],
+[
+ "US-OK",
+480.43 
+],
+[
+ "US-OR",
+442.15 
+],
+[
+ "US-PA",
+498.24 
+],
+[
+ "US-PR",
+330.31 
+],
+[
+ "US-RI",
+366.75 
+],
+[
+ "US-SC",
+465.1 
+],
+[
+ "US-SD",
+368.77 
+],
+[
+ "US-TN",
+429.67 
+],
+[
+ "US-TX",
+501.81 
+],
+[
+ "US-UT",
+444.47 
+],
+[
+ "US-VA",
+417.64 
+],
+[
+ "US-VI",
+381.51 
+],
+[
+ "US-VT",
+376.28 
+],
+[
+ "US-WA",
+485.32 
+],
+[
+ "US-WI",
+434.9 
+],
+[
+ "US-WV",
+481.56 
+],
+[
+ "US-WY",
+410.85 
+] 
+];
+data.addColumn('string','State');
+data.addColumn('number','X2009');
+data.addRows(datajson);
+return(data);
+}
+
+
+// jsData 
+function gvisDataGeoChartID50edc18396d () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+ "US-AK",
+581.99 
+],
+[
+ "US-AL",
+469.38 
+],
+[
+ "US-AR",
+442.82 
+],
+[
+ "US-AS",
+230.36 
+],
+[
+ "US-AZ",
+436.91 
+],
+[
+ "US-CA",
+512.81 
+],
+[
+ "US-CO",
+456.61 
+],
+[
+ "US-CT",
+686.02 
+],
+[
+ "US-DC",
+504.73 
+],
+[
+ "US-DE",
+403.02 
+],
+[
+ "US-FL",
+421.64 
+],
+[
+ "US-GA",
+420.63 
+],
+[
+ "US-GU",
+354.8 
+],
+[
+ "US-HI",
+474.91 
+],
+[
+ "US-IA",
+475.06 
+],
+[
+ "US-ID",
+419.67 
+],
+[
+ "US-IL",
+447.06 
+],
+[
+ "US-IN",
+527.54 
+],
+[
+ "US-KS",
+405.98 
+],
+[
+ "US-KY",
+487.64 
+],
+[
+ "US-LA",
+572.29 
+],
+[
+ "US-MA",
+487.89 
+],
+[
+ "US-MD",
+418.91 
+],
+[
+ "US-ME",
+453.75 
+],
+[
+ "US-MI",
+569.52 
+],
+[
+ "US-MN",
+482.1 
+],
+[
+ "US-MO",
+406.13 
+],
+[
+ "US-MP",
+414.73 
+],
+[
+ "US-MS",
+483.42 
+],
+[
+ "US-MT",
+395.14 
+],
+[
+ "US-NC",
+388.8 
+],
+[
+ "US-ND",
+469.27 
+],
+[
+ "US-NE",
+451.81 
+],
+[
+ "US-NH",
+446.31 
+],
+[
+ "US-NJ",
+497.91 
+],
+[
+ "US-NM",
+490.42 
+],
+[
+ "US-NV",
+500.74 
+],
+[
+ "US-NY",
+459 
+],
+[
+ "US-OH",
+596.04 
+],
+[
+ "US-OK",
+436.79 
+],
+[
+ "US-OR",
+433.68 
+],
+[
+ "US-PA",
+530.62 
+],
+[
+ "US-PR",
+329.17 
+],
+[
+ "US-RI",
+395.95 
+],
+[
+ "US-SC",
+467.8 
+],
+[
+ "US-SD",
+381.51 
+],
+[
+ "US-TN",
+390.86 
+],
+[
+ "US-TX",
+512.35 
+],
+[
+ "US-UT",
+448.35 
+],
+[
+ "US-VA",
+416.15 
+],
+[
+ "US-VI",
+366.63 
+],
+[
+ "US-VT",
+413.91 
+],
+[
+ "US-WA",
+500.09 
+],
+[
+ "US-WI",
+431.97 
+],
+[
+ "US-WV",
+470.75 
+],
+[
+ "US-WY",
+429.73 
+] 
+];
+data.addColumn('string','State');
+data.addColumn('number','X2010');
+data.addRows(datajson);
+return(data);
+}
+
+
+// jsData 
+function gvisDataGeoChartID50eda62294f () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+ "US-AK",
+594.83 
+],
+[
+ "US-AL",
+459.52 
+],
+[
+ "US-AR",
+464.02 
+],
+[
+ "US-AS",
+245.81 
+],
+[
+ "US-AZ",
+453.73 
+],
+[
+ "US-CA",
+477.3 
+],
+[
+ "US-CO",
+502.35 
+],
+[
+ "US-CT",
+680.43 
+],
+[
+ "US-DC",
+533.32 
+],
+[
+ "US-DE",
+409.24 
+],
+[
+ "US-FL",
+432.7 
+],
+[
+ "US-GA",
+425.78 
+],
+[
+ "US-GU",
+376.61 
+],
+[
+ "US-HI",
+407.45 
+],
+[
+ "US-IA",
+518.74 
+],
+[
+ "US-ID",
+430.49 
+],
+[
+ "US-IL",
+470.79 
+],
+[
+ "US-IN",
+524.46 
+],
+[
+ "US-KS",
+397.6 
+],
+[
+ "US-KY",
+498.44 
+],
+[
+ "US-LA",
+579.92 
+],
+[
+ "US-MA",
+504.81 
+],
+[
+ "US-MD",
+467.69 
+],
+[
+ "US-ME",
+463.55 
+],
+[
+ "US-MI",
+593.11 
+],
+[
+ "US-MN",
+475.01 
+],
+[
+ "US-MO",
+410.67 
+],
+[
+ "US-MP",
+390.96 
+],
+[
+ "US-MS",
+462.07 
+],
+[
+ "US-MT",
+370.95 
+],
+[
+ "US-NC",
+386.28 
+],
+[
+ "US-ND",
+482.52 
+],
+[
+ "US-NE",
+458.64 
+],
+[
+ "US-NH",
+476.92 
+],
+[
+ "US-NJ",
+494.4 
+],
+[
+ "US-NM",
+465.4 
+],
+[
+ "US-NV",
+484.47 
+],
+[
+ "US-NY",
+496.39 
+],
+[
+ "US-OH",
+518.24 
+],
+[
+ "US-OK",
+451.71 
+],
+[
+ "US-OR",
+463.83 
+],
+[
+ "US-PA",
+541.94 
+],
+[
+ "US-PR",
+328.96 
+],
+[
+ "US-RI",
+373.85 
+],
+[
+ "US-SC",
+465.82 
+],
+[
+ "US-SD",
+399.24 
+],
+[
+ "US-TN",
+398.6 
+],
+[
+ "US-TX",
+527.61 
+],
+[
+ "US-UT",
+443.97 
+],
+[
+ "US-VA",
+461.39 
+],
+[
+ "US-VI",
+392.48 
+],
+[
+ "US-VT",
+413.6 
+],
+[
+ "US-WA",
+522.9 
+],
+[
+ "US-WI",
+458.88 
+],
+[
+ "US-WV",
+505.4 
+],
+[
+ "US-WY",
+435.03 
+] 
+];
+data.addColumn('string','State');
+data.addColumn('number','X2011');
+data.addRows(datajson);
+return(data);
+}
+
+
+// jsData 
+function gvisDataGeoChartID50ed328606dc () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+ "US-AK",
+561.39 
+],
+[
+ "US-AL",
+493.21 
+],
+[
+ "US-AR",
+462.41 
+],
+[
+ "US-AS",
+217.75 
+],
+[
+ "US-AZ",
+439.57 
+],
+[
+ "US-CA",
+536.34 
+],
+[
+ "US-CO",
+544.2 
+],
+[
+ "US-CT",
+726.13 
+],
+[
+ "US-DC",
+496.39 
+],
+[
+ "US-DE",
+418.85 
+],
+[
+ "US-FL",
+442.43 
+],
+[
+ "US-GA",
+462.75 
+],
+[
+ "US-GU",
+380.96 
+],
+[
+ "US-HI",
+457.07 
+],
+[
+ "US-IA",
+530 
+],
+[
+ "US-ID",
+445.84 
+],
+[
+ "US-IL",
+470.89 
+],
+[
+ "US-IN",
+557.93 
+],
+[
+ "US-KS",
+394.2 
+],
+[
+ "US-KY",
+494.73 
+],
+[
+ "US-LA",
+557.5 
+],
+[
+ "US-MA",
+512.83 
+],
+[
+ "US-MD",
+467.17 
+],
+[
+ "US-ME",
+442.15 
+],
+[
+ "US-MI",
+605.88 
+],
+[
+ "US-MN",
+462.36 
+],
+[
+ "US-MO",
+427.56 
+],
+[
+ "US-MP",
+515.36 
+],
+[
+ "US-MS",
+480.57 
+],
+[
+ "US-MT",
+411.29 
+],
+[
+ "US-NC",
+396.52 
+],
+[
+ "US-ND",
+515.82 
+],
+[
+ "US-NE",
+453.48 
+],
+[
+ "US-NH",
+539.97 
+],
+[
+ "US-NJ",
+520.18 
+],
+[
+ "US-NM",
+411.44 
+],
+[
+ "US-NV",
+528.21 
+],
+[
+ "US-NY",
+480.65 
+],
+[
+ "US-OH",
+493.08 
+],
+[
+ "US-OK",
+480.69 
+],
+[
+ "US-OR",
+474.86 
+],
+[
+ "US-PA",
+539.49 
+],
+[
+ "US-PR",
+335.01 
+],
+[
+ "US-RI",
+411.42 
+],
+[
+ "US-SC",
+485.99 
+],
+[
+ "US-SD",
+367.78 
+],
+[
+ "US-TN",
+411.31 
+],
+[
+ "US-TX",
+531.32 
+],
+[
+ "US-UT",
+441.63 
+],
+[
+ "US-VA",
+479.2 
+],
+[
+ "US-VI",
+396.7 
+],
+[
+ "US-VT",
+429.06 
+],
+[
+ "US-WA",
+487.88 
+],
+[
+ "US-WI",
+464.49 
+],
+[
+ "US-WV",
+594.98 
+],
+[
+ "US-WY",
+455.79 
+] 
+];
+data.addColumn('string','State');
+data.addColumn('number','X2012');
+data.addRows(datajson);
+return(data);
+}
+
+
+// jsData 
+function gvisDataGeoChartID50ed7d2c6f6d () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+ "US-AK",
+549.06 
+],
+[
+ "US-AL",
+483.7 
+],
+[
+ "US-AR",
+464.97 
+],
+[
+ "US-AS",
+273.33 
+],
+[
+ "US-AZ",
+447.9 
+],
+[
+ "US-CA",
+502.4 
+],
+[
+ "US-CO",
+540.2 
+],
+[
+ "US-CT",
+740.65 
+],
+[
+ "US-DC",
+525.7 
+],
+[
+ "US-DE",
+403.94 
+],
+[
+ "US-FL",
+437.12 
+],
+[
+ "US-GA",
+506.8 
+],
+[
+ "US-GU",
+785.86 
+],
+[
+ "US-HI",
+450.19 
+],
+[
+ "US-IA",
+508.97 
+],
+[
+ "US-ID",
+478.81 
+],
+[
+ "US-IL",
+486.58 
+],
+[
+ "US-IN",
+541.84 
+],
+[
+ "US-KS",
+407.31 
+],
+[
+ "US-KY",
+518.58 
+],
+[
+ "US-LA",
+556.57 
+],
+[
+ "US-MA",
+499.39 
+],
+[
+ "US-MD",
+425.69 
+],
+[
+ "US-ME",
+487.1 
+],
+[
+ "US-MI",
+575.67 
+],
+[
+ "US-MN",
+494.83 
+],
+[
+ "US-MO",
+425.72 
+],
+[
+ "US-MP",
+424.21 
+],
+[
+ "US-MS",
+514.12 
+],
+[
+ "US-MT",
+425.5 
+],
+[
+ "US-NC",
+405.96 
+],
+[
+ "US-ND",
+528.25 
+],
+[
+ "US-NE",
+494.45 
+],
+[
+ "US-NH",
+511.77 
+],
+[
+ "US-NJ",
+513.29 
+],
+[
+ "US-NM",
+422.68 
+],
+[
+ "US-NV",
+513.51 
+],
+[
+ "US-NY",
+474.47 
+],
+[
+ "US-OH",
+449.58 
+],
+[
+ "US-OK",
+477.64 
+],
+[
+ "US-OR",
+463.74 
+],
+[
+ "US-PA",
+535.15 
+],
+[
+ "US-PR",
+343.93 
+],
+[
+ "US-RI",
+429.67 
+],
+[
+ "US-SC",
+453.07 
+],
+[
+ "US-SD",
+392.11 
+],
+[
+ "US-TN",
+388.84 
+],
+[
+ "US-TX",
+547.44 
+],
+[
+ "US-UT",
+455.94 
+],
+[
+ "US-VA",
+489.55 
+],
+[
+ "US-VI",
+411.31 
+],
+[
+ "US-VT",
+408.18 
+],
+[
+ "US-WA",
+515.2 
+],
+[
+ "US-WI",
+476.63 
+],
+[
+ "US-WV",
+581.21 
+],
+[
+ "US-WY",
+475.1 
+] 
+];
+data.addColumn('string','State');
+data.addColumn('number','X2013');
+data.addRows(datajson);
+return(data);
+}
+
+
+// jsData 
+function gvisDataGeoChartID50ed54e9fc3c () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+ "US-AK",
+541.04 
+],
+[
+ "US-AL",
+500.3 
+],
+[
+ "US-AR",
+476.11 
+],
+[
+ "US-AS",
+320.83 
+],
+[
+ "US-AZ",
+448.36 
+],
+[
+ "US-CA",
+537.34 
+],
+[
+ "US-CO",
+487.92 
+],
+[
+ "US-CT",
+813.43 
+],
+[
+ "US-DC",
+512.25 
+],
+[
+ "US-DE",
+404.86 
+],
+[
+ "US-FL",
+435.75 
+],
+[
+ "US-GA",
+473.89 
+],
+[
+ "US-GU",
+347.41 
+],
+[
+ "US-HI",
+400.6 
+],
+[
+ "US-IA",
+543.59 
+],
+[
+ "US-ID",
+478.24 
+],
+[
+ "US-IL",
+486.5 
+],
+[
+ "US-IN",
+612.51 
+],
+[
+ "US-KS",
+398.73 
+],
+[
+ "US-KY",
+551.06 
+],
+[
+ "US-LA",
+589.94 
+],
+[
+ "US-MA",
+553.48 
+],
+[
+ "US-MD",
+516.32 
+],
+[
+ "US-ME",
+512.25 
+],
+[
+ "US-MI",
+618.25 
+],
+[
+ "US-MN",
+466.38 
+],
+[
+ "US-MO",
+437.66 
+],
+[
+ "US-MP",
+445.74 
+],
+[
+ "US-MS",
+511.61 
+],
+[
+ "US-MT",
+397.02 
+],
+[
+ "US-NC",
+399.9 
+],
+[
+ "US-ND",
+523.89 
+],
+[
+ "US-NE",
+476.56 
+],
+[
+ "US-NH",
+498.55 
+],
+[
+ "US-NJ",
+540.36 
+],
+[
+ "US-NM",
+460.11 
+],
+[
+ "US-NV",
+486.78 
+],
+[
+ "US-NY",
+495.8 
+],
+[
+ "US-OH",
+460.42 
+],
+[
+ "US-OK",
+478.83 
+],
+[
+ "US-OR",
+513.88 
+],
+[
+ "US-PA",
+548.78 
+],
+[
+ "US-PR",
+337.76 
+],
+[
+ "US-RI",
+454.46 
+],
+[
+ "US-SC",
+493.27 
+],
+[
+ "US-SD",
+403.71 
+],
+[
+ "US-TN",
+389.11 
+],
+[
+ "US-TX",
+588.88 
+],
+[
+ "US-UT",
+423.78 
+],
+[
+ "US-VA",
+420.58 
+],
+[
+ "US-VI",
+402.03 
+],
+[
+ "US-VT",
+444.01 
+],
+[
+ "US-WA",
+511.21 
+],
+[
+ "US-WI",
+524.55 
+],
+[
+ "US-WV",
+572.51 
+],
+[
+ "US-WY",
+473 
+] 
+];
+data.addColumn('string','State');
+data.addColumn('number','X2014');
+data.addRows(datajson);
+return(data);
+}
+ 
+// jsDrawChart
+function drawChartGeoChartID50ed115e5239() {
+var data = gvisDataGeoChartID50ed115e5239();
+var options = {};
+options["width"] =    300;
+options["height"] =    200;
+options["region"] = "US";
+options["displayMode"] = "regions";
+options["resolution"] = "provinces";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartID50ed115e5239')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+
+
+// jsDrawChart
+function drawChartGeoChartID50edc18396d() {
+var data = gvisDataGeoChartID50edc18396d();
+var options = {};
+options["width"] =    300;
+options["height"] =    200;
+options["region"] = "US";
+options["displayMode"] = "regions";
+options["resolution"] = "provinces";
+options["title"] = "Year 2010";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartID50edc18396d')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+
+
+// jsDrawChart
+function drawChartGeoChartID50eda62294f() {
+var data = gvisDataGeoChartID50eda62294f();
+var options = {};
+options["width"] =    300;
+options["height"] =    200;
+options["region"] = "US";
+options["displayMode"] = "regions";
+options["resolution"] = "provinces";
+options["title"] = "Year 2011";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartID50eda62294f')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+
+
+// jsDrawChart
+function drawChartGeoChartID50ed328606dc() {
+var data = gvisDataGeoChartID50ed328606dc();
+var options = {};
+options["width"] =    300;
+options["height"] =    200;
+options["region"] = "US";
+options["displayMode"] = "regions";
+options["resolution"] = "provinces";
+options["title"] = "Year 2012";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartID50ed328606dc')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+
+
+// jsDrawChart
+function drawChartGeoChartID50ed7d2c6f6d() {
+var data = gvisDataGeoChartID50ed7d2c6f6d();
+var options = {};
+options["width"] =    300;
+options["height"] =    200;
+options["region"] = "US";
+options["displayMode"] = "regions";
+options["resolution"] = "provinces";
+options["title"] = "Year 2013";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartID50ed7d2c6f6d')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+
+
+// jsDrawChart
+function drawChartGeoChartID50ed54e9fc3c() {
+var data = gvisDataGeoChartID50ed54e9fc3c();
+var options = {};
+options["width"] =    300;
+options["height"] =    200;
+options["title"] = "Year 2014";
+options["region"] = "US";
+options["displayMode"] = "regions";
+options["resolution"] = "provinces";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartID50ed54e9fc3c')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+ 
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartID50ed115e5239);
+})();
+function displayChartGeoChartID50ed115e5239() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+
+
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartID50edc18396d);
+})();
+function displayChartGeoChartID50edc18396d() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+
+
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartID50eda62294f);
+})();
+function displayChartGeoChartID50eda62294f() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+
+
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartID50ed328606dc);
+})();
+function displayChartGeoChartID50ed328606dc() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+
+
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartID50ed7d2c6f6d);
+})();
+function displayChartGeoChartID50ed7d2c6f6d() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+
+
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartID50ed54e9fc3c);
+})();
+function displayChartGeoChartID50ed54e9fc3c() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+ 
+// jsFooter
+</script>
+ 
+<!-- jsChart -->  
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID50ed115e5239"></script>
+
+
+<!-- jsChart -->  
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID50edc18396d"></script>
+
+
+<!-- jsChart -->  
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID50eda62294f"></script>
+
+
+<!-- jsChart -->  
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID50ed328606dc"></script>
+
+
+<!-- jsChart -->  
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID50ed7d2c6f6d"></script>
+
+
+<!-- jsChart -->  
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID50ed54e9fc3c"></script>
+ 
+<table border="0">
+<tr>
+<td>
+
+<table border="0">
+<tr>
+<td>
+
+<table border="0">
+<tr>
+<td>
+
+<!-- divChart -->
+  
+<div id="GeoChartID50ed115e5239" 
+  style="width: 300; height: 200;">
+</div>
+
+</td>
+<td>
+
+<!-- divChart -->
+  
+<div id="GeoChartID50edc18396d" 
+  style="width: 300; height: 200;">
+</div>
+
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+<tr>
+<td>
+
+<table border="0">
+<tr>
+<td>
+
+<!-- divChart -->
+  
+<div id="GeoChartID50eda62294f" 
+  style="width: 300; height: 200;">
+</div>
+
+</td>
+<td>
+
+<!-- divChart -->
+  
+<div id="GeoChartID50ed328606dc" 
+  style="width: 300; height: 200;">
+</div>
+
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+<tr>
+<td>
+
+<table border="0">
+<tr>
+<td>
+
+<!-- divChart -->
+  
+<div id="GeoChartID50ed7d2c6f6d" 
+  style="width: 300; height: 200;">
+</div>
+
+</td>
+<td>
+
+<!-- divChart -->
+  
+<div id="GeoChartID50ed54e9fc3c" 
+  style="width: 300; height: 200;">
+</div>
+
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+ <div><span>Data: various &#8226; Chart ID: <a href="Chart_MergedID50ed18bf6a4f.html">MergedID50ed18bf6a4f</a> &#8226; <a href="https://github.com/mages/googleVis">googleVis-0.5.10</a></span><br /> 
+<!-- htmlFooter -->
+<span> 
+  R version 3.2.2 (2015-08-14) 
+  &#8226; <a href="https://developers.google.com/terms/">Google Terms of Use</a> &#8226; Data Policy: See individual charts
+</span></div>
 
 <p>This map (above) shows the average of weekly earnings for VR consumers by state at employment closure from 2008-2014. Lighter (blue) states have lower average weekly earnings, and darker (blue) states have higher average weekly earnings [change color to match the ExploreVR standard style guide] </p>
 
 
-<div class='tableauPlaceholder' id='viz1470932860412' style='position: relative'><noscript><a href='#'><img alt='Average Weekly Wages(Source: RSA911, Year 2008-2014) ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;Dashboard6&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='site_root' value='' /><param name='name' value='OccupationalStatistics2008-2014&#47;Dashboard6' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;Dashboard6&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1470932860412');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='754px';vizElement.style.height='749px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
+<!--<div class='tableauPlaceholder' id='viz1470932860412' style='position: relative'><noscript><a href='#'><img alt='Average Weekly Wages(Source: RSA911, Year 2008-2014) ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;Dashboard6&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='site_root' value='' /><param name='name' value='OccupationalStatistics2008-2014&#47;Dashboard6' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;Dashboard6&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1470932860412');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='754px';vizElement.style.height='749px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>-->
+
+<div><iframe width="950px" title="National Average of Weekly Wages by Major Occupation Types" height="700px" src="https://opendata.socrata.com/w/6c94-7dsm/y34g-bnf3?cur=1xCEHYloykb&from=root" frameborder="0"scrolling="no"><a href="https://opendata.socrata.com/Government/National-Average-of-Weekly-Wages-by-Major-Occupati/6c94-7dsm" title="National Average of Weekly Wages by Major Occupation Types" target="_blank">National Average of Weekly Wages by Major Occupation Types</a></iframe><p><a href="http://www.socrata.com/" target="_blank">Powered by Socrata</a></p></div>
 
 
 <p>The chart  (above) shows the comparison of average weekly wages between occupation types from 2008-2014. Select your state from the drop-down menu above the chart to see how wages have changed over time and how they compare to other states.</p>
@@ -57,6 +2154,9 @@
 
 <p>Lighter (red) states have lower average weekly earnings for transition age youth and darker (red) states have higher average wages for transition age youth [change colors to match the ExploreVR standard style guide] </p>
 <div class='tableauPlaceholder' id='viz1470933087886' style='position: relative'><noscript><a href='#'><img alt='Weekly Wages Across All States for Transition Age Youth(Source: RSA911, Year 2002-2014) ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Tr&#47;TransitionAgeAcrossVR&#47;Dashboard2&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='site_root' value='' /><param name='name' value='TransitionAgeAcrossVR&#47;Dashboard2' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Tr&#47;TransitionAgeAcrossVR&#47;Dashboard2&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1470933087886');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.minWidth='424px';vizElement.style.maxWidth='654px';vizElement.style.minHeight='629px';vizElement.style.maxHeight='929px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
+
+
+
 
 <p>Weekly earning trends for youth are relatively consistent across agency types and states, but agencies serving blind consumers experienced the greatest increase in weekly earnings after 2012. This graph (below) shows the trends in weekly wages for transition age youth VR consumers  in Blind, Combined, and General agencies from 2002-2014. <p>
 
