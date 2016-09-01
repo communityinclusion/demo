@@ -13,6 +13,7 @@
 
 <style media="screen">
   .pull {font-size: 3em; font-weight: bold; font-style: italic; color: #2E5793;}
+  .pull_reverse {font-size: 3em; font-weight: bold; font-style: italic; background-color: #2E5793; color:white;}
 </style>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -28,191 +29,113 @@
     <hr>
       <p class="lead">At most jobs, employees who work fewer hours make less money. An exception is employees working in ‘Arts, Design, Entertainment, Sports and Media’ occupations, where employees make more money and work fewer hours on average.</p>
     
- <div id="chart"></div>
+   
 
-<script src="http://d3js.org/d3.v2.min.js"></script>
-
-<script>
-
+<br>
+<!--number 2 chart-->
+    <div id="chart"></div>
+    <script src="http://d3js.org/d3.v2.min.js"></script>
+    <script>
 function renderChart() {
 
 var data = d3.csv.parse(d3.select('#csv').text());
-
 var valueLabelWidth = 40; // space reserved for value labels (right)
-
 var barHeight = 20; // height of one bar
-
-var barLabelWidth = 100; // space reserved for bar labels
-
+var barLabelWidth = 200; // space reserved for bar labels
 var barLabelPadding = 5; // padding between bar and bar labels (left)
-
 var gridLabelHeight = 18; // space reserved for gridline labels
-
 var gridChartOffset = 3; // space between start of grid and first bar
-
 var maxBarWidth = 420; // width of the bar with the max value
 
 // data aggregation
-
 var aggregatedData = d3.nest()
-
-.key(function(d) { return d['Type of Job']; })
-
-.rollup(function(d) {
-
-return {
-
-'value': d3.sum(d, function(e) { return parseFloat(e[' Average Weekly Income']); })
-
-};
-
-})
-
-.entries(data);
-
-// accessor functions
-
+  .key(function(d) { return d['Type of Job']; })
+  .rollup(function(d) {
+    return {
+      'value': d3.sum(d, function(e) { return parseFloat(e[' Average Weekly Income']); })
+    };
+  })
+  .entries(data);
+ 
+// accessor functions 
 var barLabel = function(d) { return d.key; };
-
 var barValue = function(d) { return d.values.value; };
-
+ 
 // scales
-
 var yScale = d3.scale.ordinal().domain(d3.range(0, aggregatedData.length)).rangeBands([0, aggregatedData.length * barHeight]);
-
 var y = function(d, i) { return yScale(i); };
-
 var yText = function(d, i) { return y(d, i) + yScale.rangeBand() / 2; };
-
 var x = d3.scale.linear().domain([0, d3.max(aggregatedData, barValue)]).range([0, maxBarWidth]);
-
 // svg container element
-
 var chart = d3.select('#chart').append("svg")
-
-.attr('width', maxBarWidth + barLabelWidth + valueLabelWidth)
-
-.attr('height', gridLabelHeight + gridChartOffset + aggregatedData.length * barHeight);
-
+  .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth)
+  .attr('height', gridLabelHeight + gridChartOffset + aggregatedData.length * barHeight);
 // grid line labels
-
 var gridContainer = chart.append('g')
-
-.attr('transform', 'translate(' + barLabelWidth + ',' + gridLabelHeight + ')');
-
+  .attr('transform', 'translate(' + barLabelWidth + ',' + gridLabelHeight + ')'); 
 gridContainer.selectAll("text").data(x.ticks(10)).enter().append("text")
-
-.attr("x", x)
-
-.attr("dy", -3)
-
-.attr("text-anchor", "middle")
-
-.text(String);
-
+  .attr("x", x)
+  .attr("dy", -3)
+  .attr("text-anchor", "middle")
+  .text(String);
 // vertical grid lines
-
 gridContainer.selectAll("line").data(x.ticks(10)).enter().append("line")
-
-.attr("x1", x)
-
-.attr("x2", x)
-
-.attr("y1", 0)
-
-.attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
-
-.style("stroke", "#ccc");
-
+  .attr("x1", x)
+  .attr("x2", x)
+  .attr("y1", 0)
+  .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+  .style("stroke", "#ccc");
 // bar labels
-
 var labelsContainer = chart.append('g')
-
-.attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + (gridLabelHeight + gridChartOffset) + ')');
-
+  .attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + (gridLabelHeight + gridChartOffset) + ')'); 
 labelsContainer.selectAll('text').data(aggregatedData).enter().append('text')
-
-.attr('y', yText)
-
-.attr('stroke', 'none')
-
-.attr('fill', 'black')
-
-.attr("dy", ".35em") // vertical-align: middle
-
-.attr('text-anchor', 'end')
-
-.text(barLabel);
-
+  .attr('y', yText)
+  .attr('stroke', 'none')
+  .attr('fill', 'black')
+  .attr("dy", ".35em") // vertical-align: middle
+  .attr('text-anchor', 'end')
+  .text(barLabel);
 // bars
-
 var barsContainer = chart.append('g')
-
-.attr('transform', 'translate(' + barLabelWidth + ',' + (gridLabelHeight + gridChartOffset) + ')');
-
+  .attr('transform', 'translate(' + barLabelWidth + ',' + (gridLabelHeight + gridChartOffset) + ')'); 
 barsContainer.selectAll("rect").data(aggregatedData).enter().append("rect")
-
-.attr('y', y)
-
-.attr('height', yScale.rangeBand())
-
-.attr('width', function(d) { return x(barValue(d)); })
-
-.attr('stroke', 'white')
-
-.attr('fill', 'steelblue');
-
+  .attr('y', y)
+  .attr('height', yScale.rangeBand())
+  .attr('width', function(d) { return x(barValue(d)); })
+  .attr('stroke', 'white')
+  .attr('fill', 'steelblue');
 // bar value labels
-
 barsContainer.selectAll("text").data(aggregatedData).enter().append("text")
-
-.attr("x", function(d) { return x(barValue(d)); })
-
-.attr("y", yText)
-
-.attr("dx", 3) // padding-left
-
-.attr("dy", ".35em") // vertical-align: middle
-
-.attr("text-anchor", "start") // text-align: right
-
-.attr("fill", "black")
-
-.attr("stroke", "none")
-
-.text(function(d) { return d3.round(barValue(d), 2); });
-
+  .attr("x", function(d) { return x(barValue(d)); })
+  .attr("y", yText)
+  .attr("dx", 3) // padding-left
+  .attr("dy", ".35em") // vertical-align: middle
+  .attr("text-anchor", "start") // text-align: right
+  .attr("fill", "black")
+  .attr("stroke", "none")
+  .text(function(d) { return d3.round(barValue(d), 2); });
 // start line
-
 barsContainer.append("line")
-
-.attr("y1", -gridChartOffset)
-
-.attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
-
-.style("stroke", "#000");
+  .attr("y1", -gridChartOffset)
+  .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+  .style("stroke", "#000");
 
 }
-
-</script>
-
-<script id="csv" type="text/csv">Type of Job, Average Weekly Income, Average Weekly Hours
-
-Food Prep/Services, 27
-
+    </script>
+    <script id="csv" type="text/csv">Type of Job, Average Weekly Income, Average Weekly Hours
+Food Prep/Services, 27 
 Architecture and Engineering,37
-
 </script>
-
-<script>renderChart();</script>
-
+    <script>renderChart();</script>
 
 
 
-<p>Few VR consumers become employed in these types of occupations, which include low-demand jobs that often require specialized skills, such as as fashion designers, actors, sports coaches, and authors. </p>
 
 
-<p class="pull">High-demand jobs generally offer significantly lower weekly earnings for just a slightly shorter work week. </p>
+<p class="pull">Jobs in the arts, design, entertainment, sports, and media fields pay higher wages for fewer hours each week, yet VR consumers are rarely hired to work in these low-demand jobs, which often require specialized skills.</p>
+<br /><br />
+
+<p class="pull_reverse">High-demand jobs generally offer significantly lower weekly earnings for just a slightly shorter work week. </p>
 
 <p>For example, in 2012, consumers placed in ‘Food Preparation and Service Related Occupations’, which include jobs such as short order cooks, restaurant servers, bartenders, and dishwashers, had average weekly earnings of $231.50, for a 27-hour work week, or $8.57/hour.</p>
 
@@ -224,6 +147,10 @@ Architecture and Engineering,37
 
 <!--<div class='tableauPlaceholder' id='viz1470932790266' style='position: relative'><noscript><a href='#'><img alt='Average Weekly Wages(Source: RSA911, Year 2008-2014) ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;AverageWeeklyWages&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='site_root' value='' /><param name='name' value='OccupationalStatistics2008-2014&#47;AverageWeeklyWages' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;AverageWeeklyWages&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1470932790266');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.minWidth='424px';vizElement.style.maxWidth='654px';vizElement.style.minHeight='629px';vizElement.style.maxHeight='929px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>-->
 
+
+
+ <!-- GeoChart generated in R 3.2.2 by googleVis 0.5.10 package -->
+<!-- Wed Aug 24 14:25:01 2016 -->
 
 
 <!-- jsHeader -->
@@ -460,7 +387,7 @@ null
 ] 
 ];
 data.addColumn('string','State');
-data.addColumn('number','X2009');
+data.addColumn('number','2009');
 data.addRows(datajson);
 return(data);
 }
@@ -697,7 +624,7 @@ var datajson =
 ] 
 ];
 data.addColumn('string','State');
-data.addColumn('number','X2010');
+data.addColumn('number','2010');
 data.addRows(datajson);
 return(data);
 }
@@ -934,7 +861,7 @@ var datajson =
 ] 
 ];
 data.addColumn('string','State');
-data.addColumn('number','X2011');
+data.addColumn('number','2011');
 data.addRows(datajson);
 return(data);
 }
@@ -1171,7 +1098,7 @@ var datajson =
 ] 
 ];
 data.addColumn('string','State');
-data.addColumn('number','X2012');
+data.addColumn('number','2012');
 data.addRows(datajson);
 return(data);
 }
@@ -1408,7 +1335,7 @@ var datajson =
 ] 
 ];
 data.addColumn('string','State');
-data.addColumn('number','X2013');
+data.addColumn('number','2013');
 data.addRows(datajson);
 return(data);
 }
@@ -1645,7 +1572,7 @@ var datajson =
 ] 
 ];
 data.addColumn('string','State');
-data.addColumn('number','X2014');
+data.addColumn('number','2014');
 data.addRows(datajson);
 return(data);
 }
@@ -1656,9 +1583,11 @@ var data = gvisDataGeoChartID50ed115e5239();
 var options = {};
 options["width"] =    300;
 options["height"] =    200;
+options["colorAxis"] = {colors:['#91BFDB', '#0075ad']};
 options["region"] = "US";
 options["displayMode"] = "regions";
 options["resolution"] = "provinces";
+
 
 
     var chart = new google.visualization.GeoChart(
@@ -1672,11 +1601,13 @@ options["resolution"] = "provinces";
 
 
 // jsDrawChart
+
 function drawChartGeoChartID50edc18396d() {
 var data = gvisDataGeoChartID50edc18396d();
 var options = {};
 options["width"] =    300;
 options["height"] =    200;
+options["colorAxis"] = {colors:['#91BFDB', '#0075ad']};
 options["region"] = "US";
 options["displayMode"] = "regions";
 options["resolution"] = "provinces";
@@ -1699,6 +1630,7 @@ var data = gvisDataGeoChartID50eda62294f();
 var options = {};
 options["width"] =    300;
 options["height"] =    200;
+options["colorAxis"] = {colors:['#91BFDB', '#0075ad']};
 options["region"] = "US";
 options["displayMode"] = "regions";
 options["resolution"] = "provinces";
@@ -1721,6 +1653,7 @@ var data = gvisDataGeoChartID50ed328606dc();
 var options = {};
 options["width"] =    300;
 options["height"] =    200;
+options["colorAxis"] = {colors:['#91BFDB', '#0075ad']};
 options["region"] = "US";
 options["displayMode"] = "regions";
 options["resolution"] = "provinces";
@@ -1743,6 +1676,7 @@ var data = gvisDataGeoChartID50ed7d2c6f6d();
 var options = {};
 options["width"] =    300;
 options["height"] =    200;
+options["colorAxis"] = {colors:['#91BFDB', '#0075ad']};
 options["region"] = "US";
 options["displayMode"] = "regions";
 options["resolution"] = "provinces";
@@ -1765,6 +1699,7 @@ var data = gvisDataGeoChartID50ed54e9fc3c();
 var options = {};
 options["width"] =    300;
 options["height"] =    200;
+options["colorAxis"] = {colors:['#91BFDB', '#0075ad']};
 options["title"] = "Year 2014";
 options["region"] = "US";
 options["displayMode"] = "regions";
@@ -2037,6 +1972,8 @@ callbacks.shift()();
 
 
 <!-- jsChart -->  
+<H1>Average Weekly Wages</H1>
+<h4>Source: RSA 911, Year 2009-2014</h4>
 <script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID50ed54e9fc3c"></script>
  
 <table border="0">
@@ -2052,7 +1989,7 @@ callbacks.shift()();
 <td>
 
 <!-- divChart -->
-  
+<h3>2009</h3>   
 <div id="GeoChartID50ed115e5239" 
   style="width: 300; height: 200;">
 </div>
@@ -2061,7 +1998,7 @@ callbacks.shift()();
 <td>
 
 <!-- divChart -->
-  
+<h3>2010</h3>   
 <div id="GeoChartID50edc18396d" 
   style="width: 300; height: 200;">
 </div>
@@ -2080,7 +2017,7 @@ callbacks.shift()();
 <td>
 
 <!-- divChart -->
-  
+<h3>2011</h3>   
 <div id="GeoChartID50eda62294f" 
   style="width: 300; height: 200;">
 </div>
@@ -2089,7 +2026,7 @@ callbacks.shift()();
 <td>
 
 <!-- divChart -->
-  
+<h3>2012</h3>   
 <div id="GeoChartID50ed328606dc" 
   style="width: 300; height: 200;">
 </div>
@@ -2112,7 +2049,7 @@ callbacks.shift()();
 <td>
 
 <!-- divChart -->
-  
+<h3>2013</h3>   
 <div id="GeoChartID50ed7d2c6f6d" 
   style="width: 300; height: 200;">
 </div>
@@ -2121,7 +2058,7 @@ callbacks.shift()();
 <td>
 
 <!-- divChart -->
-  
+<h3>2014</h3>  
 <div id="GeoChartID50ed54e9fc3c" 
   style="width: 300; height: 200;">
 </div>
@@ -2139,13 +2076,290 @@ callbacks.shift()();
   R version 3.2.2 (2015-08-14) 
   &#8226; <a href="https://developers.google.com/terms/">Google Terms of Use</a> &#8226; Data Policy: See individual charts
 </span></div>
-
-<p>This map (above) shows the average of weekly earnings for VR consumers by state at employment closure from 2008-2014. Lighter (blue) states have lower average weekly earnings, and darker (blue) states have higher average weekly earnings [change color to match the ExploreVR standard style guide] </p>
+<p>This map (above) shows the average of weekly earnings for VR consumers by state at employment closure from 2008-2014. Lighter (blue) states have lower average weekly earnings, and darker (blue) states have higher average weekly earnings </p>
 
 
 <!--<div class='tableauPlaceholder' id='viz1470932860412' style='position: relative'><noscript><a href='#'><img alt='Average Weekly Wages(Source: RSA911, Year 2008-2014) ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;Dashboard6&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='site_root' value='' /><param name='name' value='OccupationalStatistics2008-2014&#47;Dashboard6' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OccupationalStatistics2008-2014&#47;Dashboard6&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1470932860412');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='754px';vizElement.style.height='749px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>-->
 
-<div><iframe width="950px" title="National Average of Weekly Wages by Major Occupation Types" height="700px" src="https://opendata.socrata.com/w/6c94-7dsm/y34g-bnf3?cur=1xCEHYloykb&from=root" frameborder="0"scrolling="no"><a href="https://opendata.socrata.com/Government/National-Average-of-Weekly-Wages-by-Major-Occupati/6c94-7dsm" title="National Average of Weekly Wages by Major Occupation Types" target="_blank">National Average of Weekly Wages by Major Occupation Types</a></iframe><p><a href="http://www.socrata.com/" target="_blank">Powered by Socrata</a></p></div>
+<table class="table table-striped table-bordered table-hover">
+    <thead>
+ <tr>
+  <th >Major Occupation Types</th>
+  <th   >2008</th>
+  <th   >2009</th>
+  <th   >2010</th>
+  <th   >2011</th>
+  <th   >2012</th>
+  <th   >2013</th>
+  <th   >2014</th>
+ </tr>
+    </thead>
+    <tbody
+ <tr >
+  <td >Architecture
+  and Engineering Occupations</td>
+  <td >761.14</td>
+  <td >783.79</td>
+  <td >746.29</td>
+  <td >786.99</td>
+  <td >801.66</td>
+  <td >762.38</td>
+  <td >803.54</td>
+ </tr>
+ <tr >
+  <td >Arts, Design,
+  Entertainment, Sports, and Media Occupations</td>
+  <td >417.81</td>
+  <td >394.51</td>
+  <td >387.04</td>
+  <td >385.66</td>
+  <td >407.08</td>
+  <td >394.55</td>
+  <td >409.43</td>
+ </tr>
+ <tr >
+  <td >Building and
+  Grounds Cleaning and Maintenance Occupations</td>
+  <td >322.72</td>
+  <td >316.75</td>
+  <td >322.66</td>
+  <td >308.19</td>
+  <td >316.55</td>
+  <td >322.06</td>
+  <td >324.72</td>
+ </tr>
+ <tr >
+  <td >Business and
+  Financial Operations Occupations</td>
+  <td >665.06</td>
+  <td >619.84</td>
+  <td >625.2</td>
+  <td >647.73</td>
+  <td >654.59</td>
+  <td >665.89</td>
+  <td >676.04</td>
+ </tr>
+ <tr >
+  <td >Community and
+  Social Services Occupations</td>
+  <td >517.85</td>
+  <td >507.85</td>
+  <td >527.1</td>
+  <td >512.63</td>
+  <td >518.75</td>
+  <td >529.99</td>
+  <td >532.12</td>
+ </tr>
+ <tr >
+  <td >Computer and
+  Mathematical Occupations</td>
+  <td >726.24</td>
+  <td >733.95</td>
+  <td >735.33</td>
+  <td >754.54</td>
+  <td >754.56</td>
+  <td >767.38</td>
+  <td >758.44</td>
+ </tr>
+ <tr >
+  <td >Construction
+  and Extraction Occupations</td>
+  <td >516.24</td>
+  <td >521.48</td>
+  <td >515.88</td>
+  <td >528.05</td>
+  <td >531.8</td>
+  <td >558.93</td>
+  <td >556.43</td>
+ </tr>
+ <tr >
+  <td >Education,
+  Training, and Library Occupations</td>
+  <td >517.02</td>
+  <td >523.17</td>
+  <td >532.45</td>
+  <td >551.98</td>
+  <td >556.21</td>
+  <td >543.99</td>
+  <td >568.8</td>
+ </tr>
+ <tr >
+  <td >Farming, Fishing,
+  and Forestry Occupations</td>
+  <td >380.49</td>
+  <td >394.91</td>
+  <td >412.79</td>
+  <td >404.64</td>
+  <td >381.56</td>
+  <td >399.91</td>
+  <td >388.57</td>
+ </tr>
+ <tr >
+  <td >Food Preparation
+  and Serving Related Occupations</td>
+  <td >250.41</td>
+  <td >254.21</td>
+  <td >259.45</td>
+  <td >262.42</td>
+  <td >263.15</td>
+  <td >262.39</td>
+  <td >263.05</td>
+ </tr>
+ <tr >
+  <td >Healthcare
+  Practitioners and Technical Occupations</td>
+  <td >657.93</td>
+  <td >678.7</td>
+  <td >661.75</td>
+  <td >680.49</td>
+  <td >682.28</td>
+  <td >663.77</td>
+  <td >683.85</td>
+ </tr>
+ <tr >
+  <td >Healthcare
+  Support Occupations</td>
+  <td >383.4</td>
+  <td >385.42</td>
+  <td >376.46</td>
+  <td >378.92</td>
+  <td >398.19</td>
+  <td >380.85</td>
+  <td >386.05</td>
+ </tr>
+ <tr >
+  <td >Installation,
+  Maintenance, and Repair Occupations</td>
+  <td >474.16</td>
+  <td >470.43</td>
+  <td >461.03</td>
+  <td >483.08</td>
+  <td >501.61</td>
+  <td >492.49</td>
+  <td >500.65</td>
+ </tr>
+ <tr >
+  <td >Legal Occupations</td>
+  <td >806.19</td>
+  <td >739.49</td>
+  <td >719.1</td>
+  <td >733.44</td>
+  <td >780.5</td>
+  <td >773.56</td>
+  <td >699.62</td>
+ </tr>
+ <tr >
+  <td >Life, Physical,
+  and Social Science Occupations</td>
+  <td >645.1</td>
+  <td >629.3</td>
+  <td >614.87</td>
+  <td >612.72</td>
+  <td >653.42</td>
+  <td >610.06</td>
+  <td >660.17</td>
+ </tr>
+ <tr >
+  <td >Management
+  Occupations</td>
+  <td >670.22</td>
+  <td >648.58</td>
+  <td >655.58</td>
+  <td >641.08</td>
+  <td >664.69</td>
+  <td >689.96</td>
+  <td >720.78</td>
+ </tr>
+ <tr >
+  <td >Military Specific
+  Occupations</td>
+  <td >468.47</td>
+  <td >492.23</td>
+  <td >476.07</td>
+  <td >496.02</td>
+  <td >480.53</td>
+  <td >468.81</td>
+  <td >497.71</td>
+ </tr>
+ <tr >
+  <td >Office and Administrative
+  Support Occupations</td>
+  <td >387.53</td>
+  <td >387.35</td>
+  <td >386.43</td>
+  <td >392.72</td>
+  <td >395.82</td>
+  <td >407.6</td>
+  <td >415.93</td>
+ </tr>
+ <tr >
+  <td >Others</td>
+  <td >143.99</td>
+  <td >174.54</td>
+  <td >182.38</td>
+  <td >180.75</td>
+  <td >218.7</td>
+  <td >174.8</td>
+  <td >375.19</td>
+ </tr>
+ <tr >
+  <td >Personal Care
+  and Service Occupations</td>
+  <td >290.07</td>
+  <td >291.1</td>
+  <td >286.14</td>
+  <td >289.85</td>
+  <td >295.17</td>
+  <td >290.06</td>
+  <td >305.04</td>
+ </tr>
+ <tr >
+  <td >Production
+  Occupations</td>
+  <td >409.48</td>
+  <td >401.68</td>
+  <td >404.4</td>
+  <td >410.66</td>
+  <td >421.77</td>
+  <td >425.84</td>
+  <td >424.86</td>
+ </tr>
+ <tr >
+  <td >Protective Service
+  Occupations</td>
+  <td >486.36</td>
+  <td >514.08</td>
+  <td >474.53</td>
+  <td >487.69</td>
+  <td >476.21</td>
+  <td >494.34</td>
+  <td >518.52</td>
+ </tr>
+ <tr >
+  <td >Sales and Related
+  Occupations</td>
+  <td >394.04</td>
+  <td >378.81</td>
+  <td >380.18</td>
+  <td >378.5</td>
+  <td >387.53</td>
+  <td >385.48</td>
+  <td >402.69</td>
+ </tr>
+ <tr >
+  <td >Transportation
+  and Material Moving Occupations</td>
+  <td >415.76</td>
+  <td >408.13</td>
+  <td >395.39</td>
+  <td >413.83</td>
+  <td >417.82</td>
+  <td >421.74</td>
+  <td >422</td>
+ </tr>
+ <tbody>
+</table>
+
 
 
 <p>The chart  (above) shows the comparison of average weekly wages between occupation types from 2008-2014. Select your state from the drop-down menu above the chart to see how wages have changed over time and how they compare to other states.</p>
